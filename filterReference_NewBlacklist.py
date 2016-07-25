@@ -19,9 +19,3 @@ des_blacklist = open("/home/samaneh/AHRD/data/blacklists/blacklist_descline_tair
 blacklist = des_blacklist.readlines()
 
 
-
-###### another test ######
-##### !!!!!!!!!!!!!! #####
-##########################
-##########################
-##########################
