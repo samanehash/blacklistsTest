@@ -3,7 +3,6 @@
 
 '''
 
-
 from Bio import SeqIO
 from pandas import ExcelWriter
 import numpy as np
@@ -113,4 +112,4 @@ for record in SeqIO.parse(tairDB, "fasta"):
  		SeqIO.write(record, tairDBFiltered_removed, "fasta")
 
 
-
+###done
