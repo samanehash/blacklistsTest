@@ -2,6 +2,8 @@
 @auther: Samaneh
 
 '''
+
+
 from Bio import SeqIO
 from pandas import ExcelWriter
 import numpy as np
