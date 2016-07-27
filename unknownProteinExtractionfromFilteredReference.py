@@ -13,7 +13,7 @@ import decimal as dc
 
 
 #seperate proteins in AHRD result with "unknown protein" from those with normal descriptions
-all_both = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_both_batch_3_incBlacklist.xlsx"))
+#all_both = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_both_batch_3_incBlacklist.xlsx"))
 all_both = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_both_tair_1_incBlacklist.xlsx"))
 
 allColnames_both = all_both.ix[2]
