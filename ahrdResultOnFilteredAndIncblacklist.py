@@ -75,26 +75,26 @@ histo(dict({"AHRDComparison_incBlacklistSprot3":AHRDComparison_incBlacklistSprot
 ####################################################################################################
 ##########AHRD scores scatter plot matrix of 2 different experiments for all proteins###############
 
-####data = {'both_sprot3_incBlacklist': bothSprot3incBlacklist['AHRD Score'], 'no_sprot3_incBlacklist': noSprot3incBlacklist['AHRD Score']}
-###allAhrd = pd.DataFrame(data, columns=['both_sprot3_incBlacklist', 'no_sprot3_incBlacklist'])
+##########data = {'both_sprot3_incBlacklist': bothSprot3incBlacklist['AHRD Score'], 'no_sprot3_incBlacklist': noSprot3incBlacklist['AHRD Score']}
+##########allAhrd = pd.DataFrame(data, columns=['both_sprot3_incBlacklist', 'no_sprot3_incBlacklist'])
 #print allAhrd
 
-###plt.title('Evaluation Scores Comparison')
+##########plt.title('Evaluation Scores Comparison')
 #filtDesScore = desScoreDf.iloc[0:100,]
-###allCompare = scatter_matrix(allAhrd, alpha = 0.5, figsize=(15,15), diagonal = None) 
+##########allCompare = scatter_matrix(allAhrd, alpha = 0.5, figsize=(15,15), diagonal = None) 
 #plt.legend(desScoreDf.columns) 
 
 ###better reshape
-###[s.xaxis.label.set_rotation(45) for s in allCompare.reshape(-1)] #Change label rotation
-###[s.yaxis.label.set_rotation(0) for s in allCompare.reshape(-1)]
+##########[s.xaxis.label.set_rotation(45) for s in allCompare.reshape(-1)] #Change label rotation
+##########[s.yaxis.label.set_rotation(0) for s in allCompare.reshape(-1)]
 
-###[s.get_yaxis().set_label_coords(-0.3,0.5) for s in allCompare.reshape(-1)] #May need to offset label when rotating to prevent overlap of figure
+##########[s.get_yaxis().set_label_coords(-0.3,0.5) for s in allCompare.reshape(-1)] #May need to offset label when rotating to prevent overlap of figure
 
-###[s.set_xticks(()) for s in allCompare.reshape(-1)] #Hide all ticks
-###[s.set_yticks(()) for s in allCompare.reshape(-1)]
+##########[s.set_xticks(()) for s in allCompare.reshape(-1)] #Hide all ticks
+##########[s.set_yticks(()) for s in allCompare.reshape(-1)]
 #plt.show()
-###plt.savefig("/home/samaneh/AHRD/outputs/AHRDComparisonScatterMatrix_Sprot3incBlacklists.jpg")
-###plt.close()
+##########plt.savefig("/home/samaneh/AHRD/outputs/AHRDComparisonScatterMatrix_Sprot3incBlacklists.jpg")
+##########plt.close()
 
 ####################################### TAIR10 reference ###########################################################
 ############################################################################################################################
@@ -129,7 +129,7 @@ tairMeanList = []
 for i in range(0,4):
 	tairMeanList.append([tairList[i]['AHRD Score'].mean(), tairList[i]['Tair Score'].mean(), tairList[i]['SwissProt Score'].mean(), tairList[i]['Trembl Score'].mean()])
 
-print tairMeanList
+#print tairMeanList
 
 #######AHRD scores histogram plot of 4 different experiments##########
 
