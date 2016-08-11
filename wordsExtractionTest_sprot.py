@@ -8,7 +8,7 @@ import json
 
 #db = "../data/reference/non_red_sprot_batch_3_references.fasta"
 #db = "../uniprot_trembl_selection.fasta"
-db = "../data/db/uniprot_sprot.fasta"
+db = "../uniprot_sprot.fasta"
 seqs = SeqIO.parse(db, "fasta")
 
 firstWordList = []
@@ -43,13 +43,10 @@ for seq in seqs:
 				wordsDictCount[w_2] = wordsDictCount[w_2]+1				
 	
 #count the number of appearance of first words of descriptions in whole descriptions
-#for wrd in firstWordList:
-#	if wrd not in firstWordDictCount.keys():
-#		count = wordsDictCount[wrd]
-#		firstWordDictCount.update({wrd:count})
-
-
-print "sprot_words_count", len(wordsDictCount.keys())
+for wrd in firstWordList:
+	if wrd not in firstWordDictCount.keys():
+		count = wordsDictCount[wrd]
+		firstWordDictCount.update({wrd:count})
 
 
 #for i in range(0,lSprot):
@@ -58,19 +55,21 @@ print "sprot_words_count", len(wordsDictCount.keys())
 
 
 
-#f = open('../outputs/firstWordsDictionary_sprot.json','w')
-#sorted_firstWords_sprot = [(k,v) for v,k in sorted( [ (v,k) for k,v in firstWordDictCount.items() ] ) ]
-#print sorted_firstWords_sprot
-#json.dump(sorted_firstWords_sprot,f)
-#f.close()
+
+
+f = open('../outputs/firstWordsDictionary_sprot.json','w')
+sorted_firstWords_sprot = [(k,v) for v,k in sorted( [ (v,k) for k,v in firstWordDictCount.items() ] ) ]
+print sorted_firstWords_sprot
+json.dump(sorted_firstWords_sprot,f)
+f.close()
 
 
 
-#f = open('../outputs/wordsDictionary_sprot.json','w')
-#sorted_wordsDictCount = [(k,v) for v,k in sorted( [ (v,k) for k,v in wordsDictCount.items() ] ) ]
-#print sorted_wordsDictCount
-#json.dump(sorted_wordsDictCount,f)
-#f.close()
+f = open('../outputs/wordsDictionary_sprot.json','w')
+sorted_wordsDictCount = [(k,v) for v,k in sorted( [ (v,k) for k,v in wordsDictCount.items() ] ) ]
+print sorted_wordsDictCount
+json.dump(sorted_wordsDictCount,f)
+f.close()
 
 
 

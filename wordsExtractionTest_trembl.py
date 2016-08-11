@@ -7,7 +7,7 @@ import re
 import json
 
 #db = "../data/reference/non_red_sprot_batch_3_references.fasta"
-db = "../data/db/uniprot_trembl_selection.fasta"
+db = "/home/samaneh/AHRD/data/db/uniprot_trembl.fasta"
 #db = "../uniprot_sprot.fasta"
 seqs = SeqIO.parse(db, "fasta")
 
@@ -43,32 +43,33 @@ for seq in seqs:
 				wordsDictCount[w_2] = wordsDictCount[w_2]+1				
 	
 #count the number of appearance of first words of descriptions in whole descriptions
-#for wrd in firstWordList:
-#	if wrd not in firstWordDictCount.keys():
-#		count = wordsDictCount[wrd]
-#		firstWordDictCount.update({wrd:count})
+for wrd in firstWordList:
+	if wrd not in firstWordDictCount.keys():
+		count = wordsDictCount[wrd]
+		firstWordDictCount.update({wrd:count})
 
-
-print "tremble_words_count", len(wordsDictCount.keys())
 
 #for i in range(0,lSprot):
 #	if sorted_wordsDictCount[i][0]=="protein":
 #			print sorted_wordsDictCount[i]
 
 
-#f = open('../outputs/firstWordsDictionary_trembl.json','w')
-#sorted_firstWords_sprot = [(k,v) for v,k in sorted( [ (v,k) for k,v in firstWordDictCount.items() ] ) ]
+
+
+
+###f = open('../outputs/firstWordsDictionary_trembl.json','w')
+###sorted_firstWords_sprot = [(k,v) for v,k in sorted( [ (v,k) for k,v in firstWordDictCount.items() ] ) ]
 #print sorted_firstWords_sprot
-#json.dump(sorted_firstWords_sprot,f)
-#f.close()
+###json.dump(sorted_firstWords_sprot,f)
+###f.close()
 
 
 
-#f = open('../outputs/wordsDictionary_trembl.json','w')
-#sorted_wordsDictCount = [(k,v) for v,k in sorted( [ (v,k) for k,v in wordsDictCount.items() ] ) ]
+f = open('../outputs/wordsDictionary_trembl_all.json','w')
+sorted_wordsDictCount = [(k,v) for v,k in sorted( [ (v,k) for k,v in wordsDictCount.items() ] ) ]
 #print sorted_wordsDictCount
-#json.dump(sorted_wordsDictCount,f)
-#f.close()
+json.dump(sorted_wordsDictCount,f)
+f.close()
 
 
 
