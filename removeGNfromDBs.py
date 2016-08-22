@@ -26,7 +26,11 @@ geneDic = dict()
 for dbSeq in SeqIO.parse(sprotDB, "fasta"):				# parse sprot database fasta file
 	for token in dbSeq.description.split(" "):			# each token of each description of database	
 		if pattern in token:							# find the token containing gene name (GN=)
-			geneName = token.strip(pattern)				# exclude GN= part of the mentioned token
+			if token.strip(pattern) == "putative":
+				geneName = "al2"
+			else:		
+				geneName = token.strip(pattern)				# exclude GN= part of the mentioned token
+			
 			if geneName == "":							
 				continue 
 			#if geneName=="gene":						# in some descriptions format gene name is introduced as "GN=gene number
@@ -43,23 +47,31 @@ for dbSeq in SeqIO.parse(sprotDB, "fasta"):				# parse sprot database fasta file
 
 
 appeared = dict()
-row = 0
+row1 = 0
 
-writer = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/geneNamesAppearedInDescriptions.xlsx")
-worksheet = writer.add_worksheet()
+writer1 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/geneNamesAppearedInDescriptions.xlsx")
+worksheet1 = writer1.add_worksheet()
+
+writer2 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/geneNamesAppearedInDescriptions.xlsx")
+worksheet2 = writer2.add_worksheet()
+
 for record in ahrdResult:
-	#print record
 	words = record.split(" ")
 	for w in words:	
+		# check homolog
+		if w=="homolog":
+			worksheet2.write(row2,0,record)
+			row2 = row2 + 1
+		# check gene names
 		fLetter = w[0]
 		if fLetter in geneDic.keys():
 			for name in geneDic.get(fLetter):
 				if w == name:
 					if w not in appeared.keys():
 						appeared.update({w:record})
-						worksheet.write(row,0,w)
-						worksheet.write(row,1,record)
-						row = row + 1
+						worksheet1.write(row1,0,w)
+						worksheet1.write(row1,1,record)
+						row1 = row1 + 1
 
 
-print appeared
+
