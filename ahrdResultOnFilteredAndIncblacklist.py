@@ -42,7 +42,7 @@ sprotMeanList = []
 for i in range(0,4):
 	sprotMeanList.append([sprotList[i]['AHRD Score'].mean(), sprotList[i]['Tair Score'].mean(), sprotList[i]['SwissProt Score'].mean(), sprotList[i]['Trembl Score'].mean()])
 
-print sprotMeanList
+print "sprot3 means:", sprotMeanList
 
 #######AHRD scores histogram plot of 4 different experiments##########
 
@@ -129,7 +129,7 @@ tairMeanList = []
 for i in range(0,4):
 	tairMeanList.append([tairList[i]['AHRD Score'].mean(), tairList[i]['Tair Score'].mean(), tairList[i]['SwissProt Score'].mean(), tairList[i]['Trembl Score'].mean()])
 
-#print tairMeanList
+print "tair1 means:", tairMeanList
 
 #######AHRD scores histogram plot of 4 different experiments##########
 
