@@ -22,32 +22,25 @@ pattern = "GN="
 valueList = []
 geneDic = dict()
 
-#geneNames = open("/home/samaneh/AHRD/outputs/sprotGeneNames.txt","w")
 
-for dbSeq in SeqIO.parse(sprotDB, "fasta"):			# parse sprot database fasta file
-	for token in dbSeq.description.split(" "):		# each token of each description of database	
-		if pattern in token:						# find the token containing gene name (GN=)
-			geneName = token.strip(pattern)			# exclude GN= part of the mentioned token
-			if geneName == "":
+for dbSeq in SeqIO.parse(sprotDB, "fasta"):				# parse sprot database fasta file
+	for token in dbSeq.description.split(" "):			# each token of each description of database	
+		if pattern in token:							# find the token containing gene name (GN=)
+			geneName = token.strip(pattern)				# exclude GN= part of the mentioned token
+			if geneName == "":							
 				continue 
-			#if geneName=="gene":					# in some descriptions format gene name is introduced as "GN=gene number
-													# extract the first letter of token						
-			else:
-				k = geneName[0]
-				#print "gene=", geneName, "\t", "first letter=", geneName[0]
+			#if geneName=="gene":						# in some descriptions format gene name is introduced as "GN=gene number
+												
+			else:				
+				k = geneName[0]							# extract the first letter of token
 				if k in geneDic.keys():
-					valueList = list(geneDic.get(k))
-					if geneName not in valueList:
+					valueList = list(geneDic.get(k))	# get the list of values (tokens) starting with letter in k
+					if geneName not in valueList:	
 						valueList.append(geneName)
 						geneDic.update({k:valueList})
 				else:
 					geneDic.update({k:geneName})
-#				geneNames.write("\t")
-#				geneNames.write(geneName)
 
-#geneNames.close()
-
-#print "gene name list's length=", len(geneList)
 
 appeared = dict()
 row = 0
@@ -67,7 +60,6 @@ for record in ahrdResult:
 						worksheet.write(row,0,w)
 						worksheet.write(row,1,record)
 						row = row + 1
-					#print record, "//and//", w 
 
 
 print appeared
