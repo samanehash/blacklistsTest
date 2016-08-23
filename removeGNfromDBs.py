@@ -48,11 +48,12 @@ for dbSeq in SeqIO.parse(sprotDB, "fasta"):				# parse sprot database fasta file
 
 appeared = dict()
 row1 = 0
+row2 = 0
 
 writer1 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/geneNamesAppearedInDescriptions.xlsx")
 worksheet1 = writer1.add_worksheet()
 
-writer2 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/geneNamesAppearedInDescriptions.xlsx")
+writer2 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/homologAppearedInDescriptions.xlsx")
 worksheet2 = writer2.add_worksheet()
 
 for record in ahrdResult:
