@@ -11,7 +11,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 ###Read Data
 bothScoreDf = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_both_3.xlsx")) # AHRD tsv outputs are converted to xlsx and are read here
-#des#desScoreDf = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_descline_3.xlsx"))
+desScoreDf = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_descline_3.xlsx"))
 tokScoreDf = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_token_3.xlsx"))
 noneScoreDf = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_evaluator_output_noBlacklist_3.xlsx"))
 ###test
@@ -19,7 +19,7 @@ noneScoreDf = pd.read_excel(pd.ExcelFile("/home/samaneh/AHRD/outputs/xlsx/test_e
 #col = bothScore.columns #return column names
 ##
 bothScoreColnames = bothScoreDf.ix[2] #extract the columns names as they are placed in 3rd row
-#des#desScoreColnames = desScoreDf.ix[2]
+desScoreColnames = desScoreDf.ix[2]
 tokScoreColnames = tokScoreDf.ix[2]
 noneScoreColnames = noneScoreDf.ix[2]
 
@@ -27,15 +27,15 @@ noneScoreColnames = noneScoreDf.ix[2]
 rownames = pd.Series(range(1,1493))
 bothScoreDf = bothScoreDf.rename(columns=bothScoreColnames).drop(bothScoreDf.index[:3]) #remove first two blancked rows and rename columns to real columns names
 bothScoreDf.index = rownames #rename rows to start from 1
-#des#desScoreDf = desScoreDf.rename(columns=desScoreColnames).drop(desScoreDf.index[:3])
-#des#desScoreDf.index = rownames
+desScoreDf = desScoreDf.rename(columns=desScoreColnames).drop(desScoreDf.index[:3])
+desScoreDf.index = rownames
 tokScoreDf = tokScoreDf.rename(columns=tokScoreColnames).drop(tokScoreDf.index[:3])
 tokScoreDf.index = rownames
 noneScoreDf = noneScoreDf.rename(columns=noneScoreColnames).drop(noneScoreDf.index[:3])
 noneScoreDf.index = rownames
 
 bothScoreDf = bothScoreDf["Evaluation-Score"] #filter columns except evaluation scores:
-#des#desScoreDf = desScoreDf["Evaluation-Score"]
+desScoreDf = desScoreDf["Evaluation-Score"]
 tokScoreDf = tokScoreDf["Evaluation-Score"]
 noneScoreDf = noneScoreDf["Evaluation-Score"]
 
@@ -44,8 +44,8 @@ colnames = pd.Series(["AHRD Score","Tair Score","SwissProt Score","Trembl Score"
 
 bothScoreDf.columns = colnames
 bothScoreDf = bothScoreDf.astype(float)
-#des#desScoreDf.columns = colnames
-#des#desScoreDf = desScoreDf.astype(float)
+desScoreDf.columns = colnames
+desScoreDf = desScoreDf.astype(float)
 tokScoreDf.columns = colnames
 tokScoreDf = tokScoreDf.astype(float)
 noneScoreDf.columns = colnames
@@ -61,10 +61,10 @@ bothSprotMean = bothScoreDf['SwissProt Score'].mean()
 bothTremMean = bothScoreDf['Trembl Score'].mean()
 
 ###descline score
-#des#desAhrdMean = desScoreDf['AHRD Score'].mean()
-#des#desTairMean = desScoreDf['Tair Score'].mean()
-#des#desSprotMean = desScoreDf['SwissProt Score'].mean()
-#des#desTremMean = desScoreDf['Trembl Score'].mean()
+desAhrdMean = desScoreDf['AHRD Score'].mean()
+desTairMean = desScoreDf['Tair Score'].mean()
+desSprotMean = desScoreDf['SwissProt Score'].mean()
+desTremMean = desScoreDf['Trembl Score'].mean()
 
 ###token score
 tokAhrdMean = tokScoreDf['AHRD Score'].mean()
@@ -90,18 +90,18 @@ meanOut.close()
 
 
 ahrdBoth = bothScoreDf.iloc[:,0]
-#des#ahrdDes = desScoreDf.iloc[:,0]
+ahrdDes = desScoreDf.iloc[:,0]
 ahrdTok = tokScoreDf.iloc[:,0]
 ahrdNone = noneScoreDf.iloc[:,0]
 
-result = pd.DataFrame({"Both Evaluation Score": ahrdBoth, "Token Evaluation Score": ahrdTok, "No Blacklist Evaluation Score": ahrdNone})
-#des#result = pd.DataFrame({"Both Evaluation Score": ahrdBoth , "Descline Evaluation Score": ahrdDes, "Token Evaluation Score": ahrdTok, "No Blacklist Evaluation Score": ahrdNone})
+#result = pd.DataFrame({"Both Evaluation Score": ahrdBoth, "Token Evaluation Score": ahrdTok, "No Blacklist Evaluation Score": ahrdNone})
+result = pd.DataFrame({"Both Evaluation Score": ahrdBoth , "Descline Evaluation Score": ahrdDes, "Token Evaluation Score": ahrdTok, "No Blacklist Evaluation Score": ahrdNone})
 
 #cols = transResult.index
 cols = result.columns
 
-#des#result.plot(alpha = 0.4, kind='hist', color=['purple','grey','green','yellow'])
-result.plot(alpha = 0.4, kind='hist', color=['purple','green','yellow'])
+result.plot(alpha = 0.4, kind='hist', color=['purple','grey','green','yellow'])
+#result.plot(alpha = 0.4, kind='hist', color=['purple','green','yellow'])
 plt.ylabel("Frequency")
 plt.xlabel("AHRD Score")
 plt.legend(cols, loc = 'best') 
@@ -112,10 +112,10 @@ plt.close()
 ####################################################################################################
 ##########AHRD scores scatter plot matrix of 4 different experiments for all proteins###############
 
-#des#data = {'both': bothScoreDf['AHRD Score'], 'descline': desScoreDf['AHRD Score'], 'token': tokScoreDf['AHRD Score'], 'none': noneScoreDf['AHRD Score']}
-#des#allAhrd = pd.DataFrame(data, columns=['both', 'descline', 'token', 'none'])
-data = {'both': bothScoreDf['AHRD Score'], 'token': tokScoreDf['AHRD Score'], 'none': noneScoreDf['AHRD Score']}
-allAhrd = pd.DataFrame(data, columns=['both', 'token', 'none'])
+data = {'both': bothScoreDf['AHRD Score'], 'descline': desScoreDf['AHRD Score'], 'token': tokScoreDf['AHRD Score'], 'none': noneScoreDf['AHRD Score']}
+allAhrd = pd.DataFrame(data, columns=['both', 'descline', 'token', 'none'])
+#data = {'both': bothScoreDf['AHRD Score'], 'token': tokScoreDf['AHRD Score'], 'none': noneScoreDf['AHRD Score']}
+#allAhrd = pd.DataFrame(data, columns=['both', 'token', 'none'])
 
 plt.title('Evaluation Scores Comparison')
 #filtDesScore = desScoreDf.iloc[0:100,]
