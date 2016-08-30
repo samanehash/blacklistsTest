@@ -16,6 +16,10 @@ ahrdResult.index = rownames
 ahrdResult = ahrdResult["Human-Readable-Description"]
 
 ###extract list of geneNames from text file derived from uniprot
+writer2 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AllSprotGeneNames.xlsx")
+worksheet2 = writer2.add_worksheet()
+row2 = 0
+
 geneNames = []
 file = open("/home/samaneh/Desktop/uniprot-all.tab","r")
 for line in file.readlines():
@@ -23,11 +27,14 @@ for line in file.readlines():
 		gn = line.split()[2]
 		if gn not in geneNames:
 			geneNames.append(gn)
+			worksheet2.write(row2,0,gn)
+			row2 = row2 + 1
 
-row = 0
 
-writer = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AllgeneNamesAppearedInDescriptions.xlsx")
-worksheet = writer.add_worksheet()
+row1 = 0
+writer1 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AllgeneNamesAppearedInDescriptions.xlsx")
+worksheet1 = writer1.add_worksheet()
+
 
 for name in geneNames:
 	for record in ahrdResult:
@@ -35,6 +42,7 @@ for name in geneNames:
 		for w in words:	
 		### check gene names
 			if w == name: 
-				worksheet.write(row,0,w)
-				worksheet.write(row,1,record)
+				worksheet1.write(row1,0,w)
+				worksheet1.write(row1,1,record)
+				row1 = row1 + 1
 
