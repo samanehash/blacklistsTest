@@ -23,24 +23,16 @@ for line in file.readlines():
 		gn = line.split()[2]
 		if gn not in geneNames:
 			geneNames.append(gn)
-#print len(geneNames)
 
 row = 0
 
 writer = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AllgeneNamesAppearedInDescriptions.xlsx")
-worksheet = writer1.add_worksheet()
-
-#writer2 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/homologAppearedInDescriptions.xlsx")
-#worksheet2 = writer2.add_worksheet()
+worksheet = writer.add_worksheet()
 
 for name in geneNames:
 	for record in ahrdResult:
 		words = record.split(" ")
 		for w in words:	
-		### check homolog
-		#if w=="homolog":
-		#	worksheet2.write(row2,0,record)
-		#	row2 = row2 + 1
 		### check gene names
 			if w == name: 
 				worksheet.write(row,0,w)
