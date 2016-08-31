@@ -15,6 +15,7 @@ ahrdResult = ahrdResult.rename(columns=dfColnames).drop(ahrdResult.index[:3])
 ahrdResult.index = rownames
 ahrdResult = ahrdResult["Human-Readable-Description"]
 
+
 ###extract list of geneNames from text file derived from uniprot
 writer2 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AllSprotGeneNames.xlsx")
 worksheet2 = writer2.add_worksheet()
@@ -31,18 +32,20 @@ for line in file.readlines():
 			row2 = row2 + 1
 
 
-row1 = 0
-writer1 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AllgeneNamesAppearedInDescriptions.xlsx")
-worksheet1 = writer1.add_worksheet()
+#row1 = 0
+#writer1 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AllgeneNamesAppearedInDescriptions.xlsx")
+#worksheet1 = writer1.add_worksheet()
 
 
-for name in geneNames:
-	for record in ahrdResult:
-		words = record.split(" ")
-		for w in words:	
-		### check gene names
-			if w == name: 
-				worksheet1.write(row1,0,w)
-				worksheet1.write(row1,1,record)
-				row1 = row1 + 1
+#for record in ahrdResult:
+#	words = record.split(" ")
+#	for w in words:	
+	### check gene names
+#		for name in geneNames:
+#			print name
+#			if w == name: 
+#				print w
+#				worksheet1.write(row1,0,w)
+#				worksheet1.write(row1,1,record)
+#				row1 = row1 + 1
 
