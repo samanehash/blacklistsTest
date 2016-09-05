@@ -24,7 +24,7 @@ geneNames = GNs.values.tolist()
 
 ###########################################
 row1 = 0
-writer1 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/AGeneNamesAppearedInDescriptions.xlsx")
+writer1 = xlsxwriter.Workbook("/home/samaneh/AHRD/outputs/GeneNamesAppearedInDescriptions.xlsx")
 worksheet1 = writer1.add_worksheet()
 
 
@@ -38,8 +38,5 @@ for record in ahrdResult:
 				worksheet1.write(row1,0,w)
 				worksheet1.write(row1,1,record)
 				row1 = row1 + 1
-			elif w == "GRF5":
-				worksheet1.write(row1,0,w)
-				worksheet1.write(row1,1,record)
-				row1 = row1 + 1
+
 
