@@ -36,7 +36,6 @@ df1 = pd.DataFrame({"reference description":rfDes, "AHRD using old blacklist des
 
 
 def comparison(rfList,oldList, newList):
-	counter = 0
 	diffOld = []
 	diffNew = []
 	diffRef = []
@@ -47,10 +46,7 @@ def comparison(rfList,oldList, newList):
 		if old not in new:
 			diffOld.append(old)
 			diffNew.append(new)	
-			diffRef.append(rf)
-			if "unknown" in rf:
-				counter = counter + 1	
-	print counter			
+			diffRef.append(rf)				
 	df2 = pd.DataFrame({"reference description":diffRef, "AHRD using old blacklist description":diffOld, "AHRD using new blacklist description":diffNew})
 	return df2
 
