@@ -34,7 +34,6 @@ oldDes = pd.Series(sprotList[0]["Human-Readable-Description"])
 newDes = pd.Series(sprotList[1]["Human-Readable-Description"])
 df1 = pd.DataFrame({"reference description":rfDes, "AHRD using old blacklist description":oldDes, "AHRD using new blacklist description":newDes})
 
-
 def comparison(rfList,oldList, newList):
 	diffOld = []
 	diffNew = []
@@ -49,7 +48,6 @@ def comparison(rfList,oldList, newList):
 			diffRef.append(rf)				
 	df2 = pd.DataFrame({"reference description":diffRef, "AHRD using old blacklist description":diffOld, "AHRD using new blacklist description":diffNew})
 	return df2
-
 			
 df2 = comparison(rfDes,oldDes, newDes)
 
