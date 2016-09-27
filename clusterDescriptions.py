@@ -1,6 +1,9 @@
 '''
 @auther: Samaneh
 
+This module extract the descriptions of each sequence of clusters containing more than two members
+into a text file
+
 '''
 from Bio import SeqIO
 import pandas as pd
