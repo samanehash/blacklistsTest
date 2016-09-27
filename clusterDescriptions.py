@@ -55,10 +55,15 @@ def handler():
 	namesList = prepareNamesList(clusterFile)
 
 	rng = range(0, len(namesList))
-	p = multiprocessing.Pool(32)
+	p = multiprocessing.Pool(4)
+
+	### to check CPU band you can use: multiprocessing.cpu_count()
+	### result here shows 4 then it also make sense to use pool(4)
+	### however there is no limitation for pool and the limitation 
+	### will be put on by CPU itself
 
 ### call writingNames dunction and write the extracted descriptions into a file
-	with open("/home/samaneh/AHRD/clustering/clusteredDescriptions_test.txt","w") as f:
+	with open("/home/samaneh/AHRD/clustering/clusteredDescriptions_multiprocessed.txt","w") as f:
 		for result in (writingNames(namesList, i) for i in rng):
 			for n in result: 
 				f.write(n)
