@@ -16,86 +16,81 @@ from multiprocessing.dummy import Pool
 import suffixtreeLibrary as st
 #from django.utils.encoding import smart_str
 
-##################################################################
-######################## library #################################
-##################################################################
-
-
-
 ##################################################################################
 ##################################################################################
 ##################################################################################
 
-def findMax(descList):
+class clusters():
 
-	maxOne = ""
-	for s in descList:
-		if len(s)>len(maxOne):
-			maxOne = s
-	return maxOne		
+	def __init__(self):
 
-### updates the suffixes dictionary
-def suffixUpdate(s, suffixDic):
+		self.suffixDic = dict()
+		self.longest_common_string = ""
 
-	if s in suffixDic.keys():
-		suffixDic[s] = suffixDic[s] + 1
-	else:
-		suffixDic.update({s:1})
-		
-	return suffixDic
 
-def makeSuffixTree(descriptions):
 
-	#stree = GeneralisedSuffixTree(descriptions)
-	#print findMax(descriptions), "\n", "****************"
-	charList = []
-	symb = ""
-	#longestLength = (l(descriptions))
-	stree = st.STree(input=descriptions)
-	longest_common_string, wii = stree.lcs()
-	UPPAs = list(list(range(0xE000,0xF8FF+1)) + list(range(0xF0000,0xFFFFD+1)) + list(range(0x100000, 0x10FFFD+1)))
-	#print UPPAs
-	#w = w.encode("ascii","ignore")
-	wiiStr = []
-	wiiStr.append(wii.encode("utf8","ignore"))
-	print type(wiiStr[0])
-	for i in range(0,len(UPPAs)):
-		y = unichr(UPPAs[i])
-		charList.append(y)
-	for w in wii:
+	def findMax(self,descList):
+
+		maxOne = ""
+		for s in descList:
+			if len(s)>len(maxOne):
+				maxOne = s
+		return maxOne		
+
+
+	def makeSuffixTree(self, names, descriptions):
+
+
+		charList = []
+		suffixDict = dict()
+		suffixDic = dict()
+		#longestLength = (l(descriptions))
+		stree = st.STree(input=descriptions)
+		self.longest_common_string, wii = stree.lcs()
+		wiiStr = wii.encode("utf8","ignore")
+
+		##@sa## extracting all descriptions which are return from lcs functions of suffixtreeLibrary
+		UPPAs = list(list(range(0xE000,0xF8FF+1)) + list(range(0xF0000,0xFFFFD+1)) + list(range(0x100000, 0x10FFFD+1)))
+		for i in range(0,len(UPPAs)):
+			y = unichr(UPPAs[i])
+			charList.append(y)
+
+		suffList = [] ##@sam## a list of all descriptions
+		suffList.append(wiiStr)
+
 		for c in charList:
-			if c in w:
-				for j in range(0,len(wiiStr)):
-					temp = []
-					#print type(wiiStr[j])
-					temp.append(wiiStr[j].split(c.encode("utf8","ignore")))
-				wiiStr = []
-				wiiStr = temp
-				
-	#wordsList = re.split(symb,wiiStr)
-				
-	#for s in range(0,len(symb)):
-		#print type(symb[s])
-		#wii = wii.split(symb[s])
+			convertedC = c.encode("utf8","ignore")
+			for j in range(0,len(suffList)):
+				if convertedC in suffList[j]:
+					temp = suffList[j]
+					del suffList[j]	
+					for token in temp.split(convertedC): 	
+						suffList.append(token)
+		del suffList[len(suffList)-1]				
+	
 
-	#wii.split(s for s in symb)
-	#tempList = w.split((i.lstrip("u") for i in UPPAs[0] or UPPAs[1] or UPPAs[2] ))
-	#d = [[s.encode("ascii") for s in l] for l in w]
-	#UPPAs = list(list(range(0xE000,0xF8FF+1)) + list(range(0xF0000,0xFFFFD+1)) + list(range(0x100000, 0x10FFFD+1)))
-	#print UPPAs[0].encode("utf8","ignore")
-	#print UPPAs[0]
-	#print w.split(UPPAs[0])
-	#######tempList = [smart_str(i) for i in w]
-	longest_common_string = longest_common_string.encode("ascii","ignore") ##@sam## convert unicode to string
-	l = [str(s) for s in longest_common_string.lstrip(" ").rstrip(" ").split(" ")] ##@sam## convert string to list
-	minimalLength = len(findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
-	if len(l) > minimalLength:  ##@sam## check if the selected description meets the minimal length
-		print longest_common_string,"\n", "w:", wiiStr, "\n", "*******"
 
+	##@sam## return all descriptions of a cluster and its selected longest common part of descriptions whose length is at least as long as 5% of the longest description of the cluster
+		self.longest_common_string = self.longest_common_string.encode("ascii","ignore") ##@sam## convert unicode to string
+		l = [str(s) for s in self.longest_common_string.lstrip(" ").rstrip(" ").split(" ")] ##@sam## convert string to list
+		minimalLength = len(self.findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
+		if len(l) >= minimalLength:  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
+			#print "longest common:", "\n", longest_common_string,"\n", "all descriptions:", suffList, "\n", "*******"
+			for n in names:
+				self.suffixDic.update({n:self.longest_common_string})
+
+		#for des in suffList:
+
+
+		print "longest common:", "\n", self.longest_common_string,"\n", "all descriptions:", self.suffixDic, "\n", "*******" 
+
+
+
+##@sam## manual longest common string extraction
 	###has a function for extracting all shared substrings of the set of strings or all shared substrings of a given minimal length
 	#longestLength = 0
-	longestDes = ""
-	suffixDic = dict()
+	#longestDes = ""
+	#suffixDic = dict()
 
 	#for strng in stree.lcs(): 
 		#longest = len(max(stree.sequences))
@@ -125,52 +120,42 @@ def makeSuffixTree(descriptions):
 #		print longestDes, "l=", len(longestDes) , "\n", longestLength 
 
 ########################################
+	# @staticmethod ##@sam## create satatic method:
+	def extractDesc(self,clstrsFile):
+		
+		tempFlag = False ### temporary flag until the file contains \n as the ending line
+		seqNames = []
+		names = []
+		descs = []
+		lines = clstrsFile.readlines()
 
-def extractDesc(clstrsFile):
-	
-	tempFlag = False ### temporary flag until the file contains \n as the ending line
-	seqNames = []
-	names = []
-	descs = []
-	lines = clstrsFile.readlines()
+		for i in range(0,len(lines)):
+			if lines[i][0] == "#":
+				tempFlag = False
+				seqNames = []
+				names = []
+				descs = []
+			elif lines[i][0] == "\n":
+				if tempFlag == True:
+				#i = 0
+					self.makeSuffixTree(names, descs)	
 
-	for i in range(0,len(lines)):
-		if lines[i][0] == "#":
-			tempFlag = False
-			seqNames = []
-			names = []
-			descs = []
-		elif lines[i][0] == "\n":
-			if tempFlag == True:
-			#i = 0
-				makeSuffixTree(descs)	
-			
-		else:
-			tempFlag = True
-			seqNames = lines[i].split("|")
-			for i in range(0,2):
-				seqNames[i] = seqNames[i].strip(" ").strip("\n")
-			names.append(seqNames[0])
-			descs.append(seqNames[1])
-
+			else:
+				tempFlag = True
+				seqNames = lines[i].split("|")
+				for i in range(0,2):
+					seqNames[i] = seqNames[i].strip(" ").strip("\n")
+				names.append(seqNames[0])
+				descs.append(seqNames[1])
 
 def handler():
 
+	d = clusters()
 	clustersFile = open("/home/samaneh/Desktop/testClusterFile.txt","r")
-	extractDesc(clustersFile)
-
+	d.extractDesc(clustersFile)
 
 if __name__ == "__main__":
 	handler()
-
-
-
-
-
-
-
-
-
 
 
 
