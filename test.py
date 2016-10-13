@@ -38,7 +38,7 @@ class clusters():
 		return maxOne		
 
 
-	def makeSuffixTree(self, names, descriptions):
+	def makeSuffixTree(self, names, descriptions, resFile):
 
 
 		charList = []
@@ -76,13 +76,10 @@ class clusters():
 		minimalLength = len(self.findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
 		if len(l) >= minimalLength:  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
 			#print "longest common:", "\n", longest_common_string,"\n", "all descriptions:", suffList, "\n", "*******"
+			resFile.write("longest common:" + "\n"+self.longest_common_string+"\n"+"all descriptions:"+str(suffList)+"\n"+"*******"+"\n")
 			for n in names:
 				self.suffixDic.update({n:self.longest_common_string})
 
-		#for des in suffList:
-
-
-		print "longest common:", "\n", self.longest_common_string,"\n", "all descriptions:", self.suffixDic, "\n", "*******" 
 
 
 
@@ -121,7 +118,7 @@ class clusters():
 
 ########################################
 	# @staticmethod ##@sam## create satatic method:
-	def extractDesc(self,clstrsFile):
+	def extractDesc(self,clstrsFile,resFile):
 		
 		tempFlag = False ### temporary flag until the file contains \n as the ending line
 		seqNames = []
@@ -138,7 +135,7 @@ class clusters():
 			elif lines[i][0] == "\n":
 				if tempFlag == True:
 				#i = 0
-					self.makeSuffixTree(names, descs)	
+					self.makeSuffixTree(names, descs, resFile)	
 
 			else:
 				tempFlag = True
@@ -152,7 +149,8 @@ def handler():
 
 	d = clusters()
 	clustersFile = open("/home/samaneh/Desktop/testClusterFile.txt","r")
-	d.extractDesc(clustersFile)
+	resultFile = open("/home/samaneh/AHRD/clustering/testClusterDescriptions.txt","w")
+	d.extractDesc(clustersFile,resultFile)
 
 if __name__ == "__main__":
 	handler()
