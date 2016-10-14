@@ -71,50 +71,52 @@ class clusters():
 
 
 	##@sam## return all descriptions of a cluster and its selected longest common part of descriptions whose length is at least as long as 5% of the longest description of the cluster
-		self.longest_common_string = self.longest_common_string.encode("ascii","ignore") ##@sam## convert unicode to string
-		l = [str(s) for s in self.longest_common_string.lstrip(" ").rstrip(" ").split(" ")] ##@sam## convert string to list
+		suDict = dict()	#dictionary whose keys are all NCP and the values are the number of appearance in descriptions 
+		originalDescDict = dict()
+		keysList = []
+
+		self.longest_common_string = self.longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ") ##@sam## convert unicode to string
 		minimalLength = len(self.findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
-		if len(l) >= minimalLength:  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
-			#print "longest common:", "\n", longest_common_string,"\n", "all descriptions:", suffList, "\n", "*******"
+		if len(self.longest_common_string) >= minimalLength and self.longest_common_string != "protein":  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
+			self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace(" truncated","")
+
+			for su in suffList:
+				suMod = su.replace("putative","").replace("(fragment)","").replace(" truncated","")	#removing non-informative part of the description
+				pure = suMod.replace(self.longest_common_string,"").strip(" ")	#extract the non-conservative part (i.e prefix or suffix)(=NCP) of the description
+				if pure in suDict.keys():	#NCP already exists in the dictionary
+					suDict.update({pure:suDict[pure]+1})	#number of appearance of this NCP in the descriptions
+				else:
+					if pure != "":
+						suDict.update({pure:1})	#add the NCP as a new item to the dictionary
+						originalDescDict.update({pure:su})	
+			keysList = []
+			for di in suDict.keys(): 	
+				v = max(suDict.values())	#find the NCP with the highest appearance (=maxNCP) 
+				threshold = 0.6 * (len(suDict))	
+				if v >= threshold:	#if maxNCP is at least 60% number of all NCPs:
+					for key, value in suDict.iteritems():	
+						if value==v:
+							#print value, "---", suDict
+							keysList.append(key)		
+					if len(keysList) == 1:	#if there is only one highly appeared NCP:
+						self.longest_common_string = originalDescDict[key]	#the lcs would be replaced by that NCP's complete decription 
+					else:
+						wordIndex = originalDescDict[key].find(keysList[0])	#the starting index of NCP
+						wordLength = len(keysList[0])	
+						startingPoint = wordIndex + wordLength + 1	
+						string = originalDescDict[keysList[0]].rstrip(" ")
+						for k in range(1,len(keysList)):
+							string = string[:startingPoint] + "/" + keysList[k] + string[startingPoint:] 
+						self.longest_common_string = string	
+
+			self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace(" truncated","")
 			resFile.write("longest common:" + "\n"+self.longest_common_string+"\n"+"all descriptions:"+str(suffList)+"\n"+"*******"+"\n")
+
+
+
 			for n in names:
 				self.suffixDic.update({n:self.longest_common_string})
 
-
-
-
-##@sam## manual longest common string extraction
-	###has a function for extracting all shared substrings of the set of strings or all shared substrings of a given minimal length
-	#longestLength = 0
-	#longestDes = ""
-	#suffixDic = dict()
-
-	#for strng in stree.lcs(): 
-		#longest = len(max(stree.sequences))
-		#for seq, start, end in shared:
-	#	print strng	
-	#		common = (stree.sequences[seq][start:end]).lower() 
-	#		l = len(common)
-	#		suffix = (stree.sequences[seq][end:]).lower()
-#
-#			if l > longestLength:
-#				longestLength = l
-#				longestDes = common
-#				longestSuf = suffix
-#				suffixDic = suffixUpdate(suffix, suffixDic)
-		
-#			if l == longestLength: 
-#				suffixDic = suffixUpdate(suffix, suffixDic)
-
-### ATENTION: in finding the most frequent suffix another strategy might be needed when there are suffix with equal frequencies 
-#	for k,v in suffixDic.items():
-#		if v == max(suffixDic.values()):
-#			longestDes = longestDes + k 
-#	longestDes = re.sub("\(fragment[s]*\)","", longestDes)	
-#	longestDes = re.sub("putative","", longestDes)
-#	if len(longestDes) > (longest/10):  ###to remove the cluster in which the descriptions differ a lot from each 
-										###other and a representative one cannot be selected	
-#		print longestDes, "l=", len(longestDes) , "\n", longestLength 
 
 ########################################
 	# @staticmethod ##@sam## create satatic method:
@@ -149,16 +151,10 @@ def handler():
 
 	d = clusters()
 	clustersFile = open("/home/samaneh/Desktop/testClusterFile.txt","r")
-	resultFile = open("/home/samaneh/AHRD/clustering/testClusterDescriptions.txt","w")
+	resultFile = open("/home/samaneh/AHRD/clustering/testClusterDescriptions_secondTest.txt","w")
 	d.extractDesc(clustersFile,resultFile)
 
 if __name__ == "__main__":
 	handler()
-
-
-
-
-
-
 
 
