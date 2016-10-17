@@ -26,7 +26,8 @@ class clusters():
 
 		self.suffixDic = dict()
 		self.longest_common_string = ""
-
+		self.prefix_longest_common_string = ""
+		self. suffix_longest_common_string = ""
 
 
 	def findMax(self,descList):
@@ -37,27 +38,80 @@ class clusters():
 				maxOne = s
 		return maxOne		
 
+	def prefixSuffixCheck(self, ncp1, ncp2):
 
-	def makeSuffixTree(self, names, descriptions, resFile):
+		PrefixOk = suffixOk = False
 
+		flag = False
+		prefixStree = st.STree(input=ncp1)
+		self.prefix_longest_common_string, prefixWii = prefixStree.lcs()
+		self.prefix_longest_common_string = self.prefix_longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ")
+		for i in range(0, len(ncp1)):
+			if ncp1[i] == self.prefix_longest_common_string:
+				PrefixOk = True
+		if PrefixOk == True:
+			self.longest_common_string = self.prefix_longest_common_string + self.longest_common_string
+			flag = True
+		#print "prefix:", self.prefix_longest_common_string, "--- lcs: ", self.longest_common_string
+		
 
+		suffixStree = st.STree(input=ncp2)
+		self.suffix_longest_common_string, suffixWii = suffixStree.lcs()
+		self.suffix_longest_common_string = self.suffix_longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ")
+		for j in range(0, len(ncp2)):
+			if ncp2[j] == self.suffix_longest_common_string:
+				suffixOk = True
+		if suffixOk == True:		
+			self.longest_common_string = self.longest_common_string + self.suffix_longest_common_string
+			flag = True
+		#print "suffix:", self.suffix_longest_common_string, "--- lcs:", self.longest_common_string
+			
+
+		return flag	
+
+	def prefixSuffixCount(self, ncp1, ncp2):
+
+		prefixKeyList = suffixKeyList = []
+		prefixDict = {i:ncp1.count(i) for i in ncp1} #count repeated prefixes in the list
+		suffixDict = {j:ncp2.count(j) for j in ncp2} #count repreated suffixes in the list
+
+		#print prefixDict, "----", suffixDict
+		prefixMax = max(prefixDict.values())
+		suffixMax = max(suffixDict.values())
+
+		for key, value in prefixDict.iteritems():	
+			if value == prefixMax:
+				prefixKeyList.append(key)
+		if len(prefixKeyList) > 1:		
+			st = prefixKeyList[0]
+			for k in range(1,(len(prefixKeyList)-1)):
+				st = st + "/" + prefixKeyList[k] 	
+			self.longest_common_string = " " + st + self.longest_common_string	
+
+		for key, value in suffixDict.iteritems():
+			if value == suffixMax:
+				suffixKeyList.append(key)
+		if len(suffixKeyList) > 1:		
+			st = suffixKeyList[0]
+			for k in range(1,(len(suffixKeyList)-1)):
+				st = st + "/" + suffixKeyList[k]	
+			self.longest_common_string = self.longest_common_string	+ " " + st		
+
+	def extractDescriptions(self,wii):
+
+		suffList = []
 		charList = []
-		suffixDict = dict()
-		suffixDic = dict()
-		#longestLength = (l(descriptions))
-		stree = st.STree(input=descriptions)
-		self.longest_common_string, wii = stree.lcs()
-		wiiStr = wii.encode("utf8","ignore")
-
+		wiiStr = wii.encode("utf8","ignore")		
 		##@sa## extracting all descriptions which are return from lcs functions of suffixtreeLibrary
 		UPPAs = list(list(range(0xE000,0xF8FF+1)) + list(range(0xF0000,0xFFFFD+1)) + list(range(0x100000, 0x10FFFD+1)))
 		for i in range(0,len(UPPAs)):
 			y = unichr(UPPAs[i])
 			charList.append(y)
 
-		suffList = [] ##@sam## a list of all descriptions
+		##@sam## a list of all descriptions
 		suffList.append(wiiStr)
 
+		##@sam## generating a list of all descriptions
 		for c in charList:
 			convertedC = c.encode("utf8","ignore")
 			for j in range(0,len(suffList)):
@@ -65,53 +119,54 @@ class clusters():
 					temp = suffList[j]
 					del suffList[j]	
 					for token in temp.split(convertedC): 	
+						token = token.replace("putative","").replace("(fragment)","").replace("(fragments)","").replace(" truncated","").replace("truncated","")
+						token = token.lstrip().rstrip()
 						suffList.append(token)
-		del suffList[len(suffList)-1]				
-	
+		del suffList[len(suffList)-1]
+		return suffList
 
+
+
+	def makeSuffixTree(self, names, descriptions, resFile):
+
+		suffixDict = dict()
+		suffixDic = dict()
+		#longestLength = (l(descriptions))
+		stree = st.STree(input=descriptions)
+		self.longest_common_string, wii = stree.lcs()
+		suffList = self.extractDescriptions(wii)
 
 	##@sam## return all descriptions of a cluster and its selected longest common part of descriptions whose length is at least as long as 5% of the longest description of the cluster
-		suDict = dict()	#dictionary whose keys are all NCP and the values are the number of appearance in descriptions 
-		originalDescDict = dict()
+		ncpDict = dict()	#dictionary whose keys are all non-conservative part (i.e prefix or suffix)(=NCP) and the values are the number of appearance in descriptions 
+		compDict = dict()
 		keysList = []
 
 		self.longest_common_string = self.longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ") ##@sam## convert unicode to string
 		minimalLength = len(self.findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
 		if len(self.longest_common_string) >= minimalLength and self.longest_common_string != "protein":  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
-			self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace(" truncated","")
-
+			ncp1 = []
+			ncp2 = []
+			wholeDes = ""
+			allTheSame = False
 			for su in suffList:
-				suMod = su.replace("putative","").replace("(fragment)","").replace(" truncated","")	#removing non-informative part of the description
-				pure = suMod.replace(self.longest_common_string,"").strip(" ")	#extract the non-conservative part (i.e prefix or suffix)(=NCP) of the description
-				if pure in suDict.keys():	#NCP already exists in the dictionary
-					suDict.update({pure:suDict[pure]+1})	#number of appearance of this NCP in the descriptions
-				else:
-					if pure != "":
-						suDict.update({pure:1})	#add the NCP as a new item to the dictionary
-						originalDescDict.update({pure:su})	
-			keysList = []
-			for di in suDict.keys(): 	
-				v = max(suDict.values())	#find the NCP with the highest appearance (=maxNCP) 
-				threshold = 0.6 * (len(suDict))	
-				if v >= threshold:	#if maxNCP is at least 60% number of all NCPs:
-					for key, value in suDict.iteritems():	
-						if value==v:
-							#print value, "---", suDict
-							keysList.append(key)		
-					if len(keysList) == 1:	#if there is only one highly appeared NCP:
-						self.longest_common_string = originalDescDict[key]	#the lcs would be replaced by that NCP's complete decription 
-					else:
-						wordIndex = originalDescDict[key].find(keysList[0])	#the starting index of NCP
-						wordLength = len(keysList[0])	
-						startingPoint = wordIndex + wordLength + 1	
-						string = originalDescDict[keysList[0]].rstrip(" ")
-						for k in range(1,len(keysList)):
-							string = string[:startingPoint] + "/" + keysList[k] + string[startingPoint:] 
-						self.longest_common_string = string	
+				cpStartingPoint = su.find(self.longest_common_string)
+				lcsLen = len(self.longest_common_string)
+				cpFinishingPoint = cpStartingPoint + lcsLen
+				suFinishingPoint = len(su)-1
+				if cpStartingPoint != 0:
+					ncp1.append(su[0:(cpStartingPoint-1)])
+				if cpFinishingPoint < suFinishingPoint:
+					ncp2.append(su[cpFinishingPoint:suFinishingPoint])
+
+			### check prefixes and suffixes for possible longest_common_string extention 
+				#psCheck = self.prefixSuffixCheck(ncp1, ncp2) #if prefixSuffixCheck returns True i.e. self.longest_common_string has been extended
+			if ncp1 and ncp2:	
+				psCheck = self.prefixSuffixCheck(ncp1, ncp2)
+				if psCheck == False:
+					self.prefixSuffixCount(ncp1, ncp2) #otherwise it tries to find words from prefix or suffix to add to self.longest_common_string
 
 			self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace(" truncated","")
-			resFile.write("longest common:" + "\n"+self.longest_common_string+"\n"+"all descriptions:"+str(suffList)+"\n"+"*******"+"\n")
-
+			resFile.write("longest common:" + "\n" + self.longest_common_string + "\n" + "all descriptions:" + str(suffList) + "\n" + "*******" + "\n")
 
 
 			for n in names:
@@ -119,7 +174,7 @@ class clusters():
 
 
 ########################################
-	# @staticmethod ##@sam## create satatic method:
+	# @staticmethod ##@sam## create static method:
 	def extractDesc(self,clstrsFile,resFile):
 		
 		tempFlag = False ### temporary flag until the file contains \n as the ending line
@@ -144,6 +199,10 @@ class clusters():
 				seqNames = lines[i].split("|")
 				for i in range(0,2):
 					seqNames[i] = seqNames[i].strip(" ").strip("\n")
+				seqNames[1] = seqNames[1].replace("putative","").replace("(fragment)","").replace("(fragments)","").replace(" truncated","").replace("truncated","")
+				seqNames[1] = seqNames[1].lstrip().rstrip()
+				if "truncated" in seqNames[1]:	
+					print seqNames[1]
 				names.append(seqNames[0])
 				descs.append(seqNames[1])
 
