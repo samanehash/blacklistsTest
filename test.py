@@ -39,51 +39,81 @@ class clusters():
 				maxOne = s
 		return maxOne		
 
-	def prefixSuffixCheck(self, ncp1, ncp2):
+	def prefixCheck(self, ncp1):
 
-		PrefixOk = suffixOk = False
+		suffSuffixOk = False
+		PrefixOk = False
+		prefixFlag = False
 
-		flag = False
 		prefixStree = st.STree(input=ncp1)
 		self.prefix_longest_common_string, prefixWii = prefixStree.lcs()
 		self.prefix_longest_common_string = self.prefix_longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ").lower()
+
+		for j in range(len(ncp1)):
+			if self.prefix_longest_common_string in ncp1[j]:
+				for word in self.prefix_longest_common_string.split():
+					if word in ncp1[j].split():
+						prefixOk = True
+						plcsEndingIndx = ncp1[j].find(self.prefix_longest_common_string) + len(self.prefix_longest_common_string) 
+						if plcsEndingIndx < len(ncp1[j]):
+							newNcp2 = ncp1[j][plcsEndingIndx:]
+							suffSuffixOk = True
+							
+		#if len(self.prefix_longest_common_string) >0:
+		#	print self.prefix_longest_common_string
 		#if "p3n-pipo" in self.prefix_longest_common_string or "genome" in self.prefix_longest_common_string:
 			#print self.prefix_longest_common_string
-		for i in range(len(ncp1)):
-			if ncp1[i] == self.prefix_longest_common_string:
-				PrefixOk = True
+		#for i in range(len(ncp1)):
+			#if ncp1[i] == self.prefix_longest_common_string:
+			#	PrefixOk = True	
 		if PrefixOk == True:
 			before = self.longest_common_string
 			self.longest_common_string = self.prefix_longest_common_string + " " + self.longest_common_string
-			#print self.prefix_longest_common_string, " + ", before, "--- extended: ", self.longest_common_string
-			flag = True
-		#print "prefix:", self.prefix_longest_common_string, "--- lcs: ", self.longest_common_string
+			if suffSuffixOk == True:
+				self.suffixCount(newNcp2)
+			prefixFlag = True
+				
+		return prefixFlag	
+
+
+	def suffixCheck(self, ncp2):
 		
+		prePrefixOk = False
+		suffixOk =False
+		suffixFlag = False
 
 		suffixStree = st.STree(input=ncp2)
 		self.suffix_longest_common_string, suffixWii = suffixStree.lcs()
 		self.suffix_longest_common_string = self.suffix_longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ").lower()
+		
 		for j in range(len(ncp2)):
-			if ncp2[j] == self.suffix_longest_common_string:
-				suffixOk = True
+			if self.suffix_longest_common_string in ncp2[j]:
+				for word in self.suffix_longest_common_string.split():
+					if word in ncp2[j].split():
+						suffixOk = True	
+						plcsStartingIndx = ncp2[j].find(self.prefix_longest_common_string) 
+						if plcsStartingIndx > 0:
+							newNcp1 = ncp2[j][0:plcsStartingIndx]
+							prePrefixOk = True
+
 		if suffixOk == True:
+			if prePrefixOk == True:
+				#if " 1-carboxy" in ncp2:
+				#	print newNcp1 
+				self.prefixCount(newNcp1)
 			before = self.longest_common_string		
 			self.longest_common_string = self.longest_common_string + " " + self.suffix_longest_common_string
-			#print self.suffix_longest_common_string, " + ", before, "--- extended: ", self.longest_common_string
-			flag = True
-		#print "suffix:", self.suffix_longest_common_string, "--- lcs:", self.longest_common_string
-			
-		return flag	
+			suffixFlag = True
 
-	def prefixSuffixCount(self, ncp1, ncp2):
+		return suffixFlag
 
-		prefixKeyList = suffixKeyList = []
+
+	def prefixCount(self, ncp1):
+
+		prefixKeyList = []
 		prefixDict = {i:ncp1.count(i) for i in ncp1} #count repeated prefixes in the list
-		suffixDict = {j:ncp2.count(j) for j in ncp2} #count repreated suffixes in the list
-
-		#print prefixDict, "----", suffixDict
+		
 		prefixMax = max(prefixDict.values())
-		suffixMax = max(suffixDict.values())
 
 		for key, value in prefixDict.iteritems():	
 			if value == prefixMax:
@@ -92,11 +122,18 @@ class clusters():
 			#print prefixKeyList		
 			st = prefixKeyList[0]
 			for k in range(1,len(prefixKeyList)):
-				st = st + "/" + prefixKeyList[k]
-				#print "---> ", st 	
+				st = st + "/" + prefixKeyList[k]	
 			self.longest_common_string = st + self.longest_common_string	
 		else:
 			self.longest_common_string = prefixKeyList[0] + self.longest_common_string	
+
+		
+	def suffixCount(self, ncp2):
+
+		suffixKeyList = []
+		suffixDict = {j:ncp2.count(j) for j in ncp2} #count repreated suffixes in the list
+
+		suffixMax = max(suffixDict.values())
 
 		for key, value in suffixDict.iteritems():
 			if value == suffixMax:
@@ -108,6 +145,7 @@ class clusters():
 			self.longest_common_string = self.longest_common_string	+ " " + st		
 		else:
 			self.longest_common_string = " " + suffixKeyList[0] + self.longest_common_string	
+
 
 	def extractDescriptions(self,wii):
 
@@ -138,66 +176,77 @@ class clusters():
 		return suffList
 
 
+	def pairwiseCheck(self, inputList):
+		
+		removeFlag = False
+		base = max(inputList)
+		threshold = (0.8*len(base))
+		for i in range(len(inputList)):
+			if len(inputList[i]) < threshold:
+				removeFlag = True
+
 
 	def makeSuffixTree(self, names, descriptions, resFile):
 
 		suffixDict = dict()
 		resultDic = dict() #dictionary of sequence ids with corresponding selected (representative) descriptions
 		#longestLength = (l(descriptions))
-		stree = st.STree(input=descriptions)
-		self.longest_common_string, wii = stree.lcs()
-		suffList = self.extractDescriptions(wii)
+		if not self.pairwiseCheck(descriptions):
+			stree = st.STree(input=descriptions)
+			self.longest_common_string, wii = stree.lcs()
+			suffList = self.extractDescriptions(wii)
 
-	##@sam## return all descriptions of a cluster and its selected longest common part of descriptions whose length is at least as long as 5% of the longest description of the cluster
-		ncpDict = dict()	#dictionary whose keys are all non-conservative part (i.e prefix or suffix)(=NCP) and the values are the number of appearance in descriptions 
-		compDict = dict()
-		keysList = []
+		##@sam## return all descriptions of a cluster and its selected longest common part of descriptions whose length is at least as long as 5% of the longest description of the cluster
+			ncpDict = dict()	#dictionary whose keys are all non-conservative part (i.e prefix or suffix)(=NCP) and the values are the number of appearance in descriptions 
+			compDict = dict()
+			keysList = []
 
-		self.longest_common_string = self.longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ") ##@sam## convert unicode to string
-		minimalLength = len(self.findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
-		if len(self.longest_common_string) >= minimalLength and self.longest_common_string != "protein":  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
-			ncp1 = [] # list of prefixes of longest_common_string of all descriptions
-			ncp2 = [] # list of suffixes of longest_common_string of all descriptions
-			wholeDes = ""
-			allTheSame = False
-			for su in suffList:
-				cpStartingPoint = su.find(self.longest_common_string)	#finds the starting index of longest_common_string
-				lcsLen = len(self.longest_common_string)	
-				cpFinishingPoint = cpStartingPoint + lcsLen #finds the ending index of longest_commom_string
- 				suFinishingPoint = len(su)
-				if cpStartingPoint > 0:
-					s = su[0:cpStartingPoint]
-					ncp1.append(s)
-					#if "p3n-pipo" in s or "genome" in s:
-					#	print s
-				if cpFinishingPoint < suFinishingPoint:
-					ncp2.append(su[cpFinishingPoint:suFinishingPoint])
-			######?????????????#############		
-			if "enom" in ncp1 or "3n-pip" in ncp1:
-				print ncp1, ncp2	
+			self.longest_common_string = self.longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ") ##@sam## convert unicode to string
+			minimalLength = len(self.findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
+			if len(self.longest_common_string) >= minimalLength and self.longest_common_string != "protein":  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
+				
+				ncp1 = [] # list of prefixes of longest_common_string of all descriptions
+				ncp2 = [] # list of suffixes of longest_common_string of all descriptions
+				wholeDes = ""
+				allTheSame = False
+				for su in suffList:
+					cpStartingPoint = su.find(self.longest_common_string)	#finds the starting index of longest_common_string
+					lcsLen = len(self.longest_common_string)	
+					cpFinishingPoint = cpStartingPoint + lcsLen #finds the ending index of longest_commom_string
+	 				suFinishingPoint = len(su)
+					if cpStartingPoint > 0:
+						s = su[0:cpStartingPoint]
+						ncp1.append(s)
+					if cpFinishingPoint < suFinishingPoint:
+						ncp2.append(su[cpFinishingPoint:suFinishingPoint])
+		
+				######?????????????#############		
+				#if "enom" in ncp1 or "3n-pip" in ncp1:
+				#	print ncp1, ncp2	
 
-			### check prefixes and suffixes for possible longest_common_string extention 
-			if ncp1 and ncp2:	
-				#if "p3n-pipo" in ncp1 or "genome" in ncp1 or "p3n-pipo" in ncp2 or "genome" in ncp2:
-				#	print "ncp1: ", ncp1, "ncp2: ", ncp2
-				#print ncp1, "--->", ncp2
-				psCheck = self.prefixSuffixCheck(ncp1, ncp2) #if prefixSuffixCheck returns True i.e. self.longest_common_string has been extended
-				if psCheck == False:
-					self.prefixSuffixCount(ncp1, ncp2) #otherwise it tries to find words from prefix or suffix to add to self.longest_common_string
-					#if "p3n-pipo" in ncp1 or "genome" in ncp1 or "p3n-pipo" in ncp2 or "genome" in ncp2:
-					#	print ncp1, ncp2
+				### check prefixes and suffixes for possible longest_common_string extention 
+				if ncp1:
+					pCheck = self.prefixCheck(ncp1)	#if prefixCheck returns True i.e. self.longest_common_string has been extended
+					if pCheck == False:
+						self.prefixCount(ncp1)	#otherwise it tries to find words from prefixes to add to self.longest_common_string
+				if ncp2:
+					sCheck = self.suffixCheck(ncp2)	#if suffixCheck returns True i.e. self.longest_common_string has been extended	
+					if sCheck == False:
+						self.suffixCount(ncp2)	#otherwise it tries to find words from suffixes to add to self.longest_common_string
+				#if "3-phosphoshikimate" in self.longest_common_string:
+				#	print ncp1, ncp2, "sCheck= ", sCheck		
 
-			self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace(" truncated","").replace("homolog","").replace("probable","")
-			resFile.write("longest common:" + "\n" + self.longest_common_string + "\n" + "all descriptions:" + str(suffList) + "\n" + "*******" + "\n")
+				self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace(" truncated","").replace("truncated","").replace("homolog","").replace("probable","")
+			
+				resFile.write("longest common:" + "\n" + self.longest_common_string + "\n" + "all descriptions:" + str(suffList) + "\n" + "*******" + "\n")
 
 
-			for n in names:
-				resultDic.update({n:self.longest_common_string})
-			##@sam## write the dictionary into a json file:
-			#outFile = open("/home/samaneh/AHRD/clustering/seqIDsAndDescriptions","w")
-			#json.dump(resultDic, outFile)	
-		return resultDic
-
+				for n in names:
+					resultDic.update({n:self.longest_common_string})
+				##@sam## write the dictionary into a json file:
+				#outFile = open("/home/samaneh/AHRD/clustering/seqIDsAndDescriptions","w")
+				#json.dump(resultDic, outFile)	
+			return resultDic
 
 
 ########################################
@@ -237,7 +286,7 @@ class clusters():
 def handler():
 
 	d = clusters()
-	clustersFile = open("/home/samaneh/Desktop/testClusterFile.txt","r")
+	clustersFile = open("/home/samaneh/AHRD/clustering/testClusterFile.txt","r")
 	resultFile = open("/home/samaneh/AHRD/clustering/testClusterDescriptions_secondTest.txt","w")
 	d.extractDesc(clustersFile,resultFile)
 
