@@ -71,7 +71,7 @@ class clusters():
 				prefix = self.prefixCount(pPrefix)
 			if pSuffix:
 				suffix = self.suffixCount(pSuffix)
-			self.longest_common_string = prefix + " " + self.prefix_longest_common_string + " " + suffix + " " + self.longest_common_string
+			self.longest_common_string = prefix + self.prefix_longest_common_string + suffix + " " + self.longest_common_string
 			prefixFlag = True	
 		
 		return prefixFlag	
@@ -99,21 +99,27 @@ class clusters():
 				suffixOk = True  
 
 		if suffixOk == True:
-			for i in range(len(ncp2)):
-				prefix = suffix = ""
-				slcsStartingIndx = ncp2[i].find(self.suffix_longest_common_string) 
-				slcsEndingIndx = slcsStartingIndx + len(self.suffix_longest_common_string)
-				if slcsStartingIndx > 0:
-					sPrefix.append(ncp2[i][0:slcsStartingIndx])
-				if slcsEndingIndx < len(ncp2[i]):
-					sSuffix.append(ncp2[i][slcsEndingIndx:])
-			if sPrefix:
-				prefix = self.prefixCount(sPrefix)
-			if sSuffix:
-				suffix = self.suffixCount(sSuffix)
+			sLength = len(self.suffix_longest_common_string) 
+			if sLength == 1:
+				self.longest_common_string = self.longest_common_string.strip(" ") + "/" + self.longest_common_string.split()[-1] + self.suffix_longest_common_string
+				suffixFlag = True
+			else:
+				for i in range(len(ncp2)):
+					prefix = suffix = ""
+					slcsStartingIndx = ncp2[i].find(self.suffix_longest_common_string) 
+					slcsEndingIndx = slcsStartingIndx + len(self.suffix_longest_common_string)
+					if slcsStartingIndx > 0:
+						sPrefix.append(ncp2[i][0:slcsStartingIndx])
+					if slcsEndingIndx < len(ncp2[i]):
+						sSuffix.append(ncp2[i][slcsEndingIndx:])
+				if sPrefix:
+					prefix = self.prefixCount(sPrefix)
+				if sSuffix:
+					suffix = self.suffixCount(sSuffix)
 
-			self.longest_common_string = self.longest_common_string + " " + prefix + " " + self.suffix_longest_common_string + " " + suffix
-			suffixFlag = True
+				#print self.suffix_longest_common_string
+				self.longest_common_string = self.longest_common_string + " " + prefix + " " + self.suffix_longest_common_string + " " + suffix
+				suffixFlag = True
 
 		return suffixFlag
 
@@ -125,14 +131,15 @@ class clusters():
 		
 		prefixMax = max(prefixDict.values())
 
+		prefix = ""
 		for key, value in prefixDict.iteritems():	
 			if value == prefixMax:
-				prefixKeyList.append(key)				
-		prefix = prefixKeyList[0]
+				prefixKeyList.append(key)
+		if prefixKeyList[0] != " ":						
+			prefix = prefixKeyList[0]
 		for k in range(1,len(prefixKeyList)):
 			if prefixKeyList[k] != " ":
 				prefix = prefix + "/" + prefixKeyList[k]	
-		
 		return prefix
 
 	def suffixCount(self, ncp2):
@@ -142,12 +149,14 @@ class clusters():
 
 		suffixMax = max(suffixDict.values())
 
+		suffix = ""
 		for key, value in suffixDict.iteritems():
 			if value == suffixMax:
-				suffixKeyList.append(key)
-		suffix = suffixKeyList[0]		
+				suffixKeyList.append(key)	
+		if suffixKeyList[0] != " ":
+			suffix = suffixKeyList[0]
 		for k in range(1,len(suffixKeyList)):
-			if suffixKeyList[k] != " ":
+			if suffixKeyList[k] != " " and not re.match("\d",suffixKeyList[k]):	##@sam## numbers should not be considered as suffixes
 				suffix = suffix + "/" + suffixKeyList[k]	
 
 		return suffix
@@ -206,8 +215,8 @@ class clusters():
 			keysList = []
 
 			self.longest_common_string = self.longest_common_string.encode("ascii","ignore").lstrip(" ").rstrip(" ") ##@sam## convert unicode to string
-			minimalLength = len(self.findMax(descriptions))/20 ##@sam## define the minimal lenth of accepted common description
-			if len(self.longest_common_string) >= minimalLength and self.longest_common_string != "protein":  ##@sam## check if the selected description meets the minimal length and ignore clusters with too short common longest descriprion
+			minimalLength = len(self.findMax(descriptions))*0.2 ##@sam## define the minimal lenth of accepted common description
+			if len(self.longest_common_string) >= minimalLength and self.longest_common_string != "protein":  ##@sam## clusters with totally different descriptions should be removed entirely
 				ncp1 = []
 				ncp2 = [] # list of prefixes and suffixes of longest_common_string of all descriptions
 				wholeDes = ""
@@ -233,10 +242,9 @@ class clusters():
 				if ncp2:
 					sCheck = self.suffixCheck(ncp2)	#if suffixCheck returns True i.e. self.longest_common_string has been extended	
 					if sCheck == False:
-						suffix = self.suffixCount(ncp2)	#otherwise it tries to find words from suffixes to add to self.longest_common_string
+						suffix = self.suffixCount(ncp2)	#otherwise it tries to find words from suffixes to add to self.longest_common_string	
 						self.longest_common_string = self.longest_common_string + " " + suffix 
-	
-
+				
 				self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace("(fragments)","").replace(" truncated","").replace("truncated","").replace("homolog","").replace("probable","").replace("(predicted)","")
 			
 				resFile.write("longest common:" + "\n" + self.longest_common_string + "\n" + "all descriptions:" + str(suffList) + "\n" + "*******" + "\n")
@@ -285,8 +293,8 @@ class clusters():
 def handler():
 
 	d = clusters()
-	clustersFile = open("/home/samaneh/AHRD/clustering/testClusterFile.txt","r")
-	resultFile = open("/home/samaneh/AHRD/clustering/testClusterDescriptions_secondTest.txt","w")
+	clustersFile = open("/home/samaneh/AHRD/clustering/clusteredDescriptions_final.txt","r")
+	resultFile = open("/home/samaneh/AHRD/clustering/testClusterDescriptions_onSprot.txt","w")
 	d.extractDesc(clustersFile,resultFile)
 
 if __name__ == "__main__":
