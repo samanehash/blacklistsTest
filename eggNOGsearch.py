@@ -3,6 +3,15 @@
 
 WORKING VERSION
 
+from eggnog clusters data the cluster names, eggnog specified sequences' IDs (NOG.members.tsv), 
+all aligned sequences of each cluster (NOG_raw_algs), and the representative description (selected
+by eggnog algorithm) for each cluster (NOG.annotations.tsv) are available.
+
+Here I am 1. diminishing the clusters to only those cluster with sequences present in sprot
+database be included -> next script: 2. select the representative description for remaining clusters using my 
+algorithm 
+
+
 '''
 from Bio import SeqIO
 import pandas as pd
@@ -14,7 +23,7 @@ import os
 
 ######################################################
 
-members = open("/home/samaneh/eggNOG/data/eukaryotes/euNOG.members.tsv","r")
+members = open("/home/samaneh/eggNOG/data/NOG.members.tsv","r")
 clusterNameList = []
 for member in members:
 	member = member.strip().split("\t")
@@ -22,42 +31,43 @@ for member in members:
 	#memberNames = member[-1].split(",")
 	#clustersDic.update({clusterName:memberNames})
 
-#print clustersDic
+dbFile = open("/home/samaneh/AHRD/data/uniprot_sprot.fasta")
+
 clustersDic = dict()
-seqdescs = desList = []
-dbFile = open("/home/samaneh/AHRD/data/uniprot_trembl.fasta")
-count = 0
+namesList = []
+seqdescs = []
+seqList = []
+desList = []
+
 for cluster in clusterNameList:			##@sam## phase2,3
-	fileToOpen = "/home/samaneh/eggNOG/data/eukaryotes/euNOG_raw_algs/" + cluster   ##@sam## according to the clusterName generate the name of cluster's
-	fileToOpenName = fileToOpen + ".meta_raw.fa" 									##@sam## fasta file to be retrieved from raw_alg address
-	if os.path.isfile(fileToOpenName):
-		clusterFile = open((fileToOpenName),"r")
-	else:
-		fileToOpenName = fileToOpen + ".clustalo_raw.fa"
-		if os.path.isfile(fileToOpenName):
+	fileToOpen = "/home/samaneh/eggNOG/data/NOG_raw_algs/" + cluster   ##@sam## according to the clusterName generate the name of cluster's
+	suffixList = [".meta_raw.fa", ".meta_raw.fasta", ".clustalo_raw.fa", ".mafft_raw.fa"]	##@sam## gives us 190637 out of 190649 so far
+	for s in suffixList:
+		fileToOpenName = fileToOpen + s 									##@sam## fasta file to be retrieved from raw_alg address
+		if os.path.isfile(fileToOpenName):	##@sam## checks if such file exists
 			clusterFile = open((fileToOpenName),"r")
-		else:	
-			fileToOpenName = fileToOpen + ".mafft_raw.fa"
-			clusterFile = open((fileToOpenName),"r")	
+			namesList.append(cluster)
+	seqNumber = 0
+	count = 0		
 	for record in SeqIO.parse(clusterFile, "fasta"):
-		desList.append(str(record.seq).replace("-",""))		
-	for seq in SeqIO.parse(dbFile, "fasta"):		##@sam## from each cluster's fasta file the sequences of memebers can be rerived	
-		for des in desList:							##@sam## and be compared with all sequences of trembl. when the matched sequences are found,
-			if des == str(seq.seq):					##@sam## the descriptions will be extracted and added as values of coresponding key(cluster name)
-				seqdescs.append(seq.description)
-	clustersDic.update({cluster:seqdescs})			
-print clustersDic
+		seqNumber = seqNumber + 1
+		sequence = str(record.seq).replace("-","")
+		for entry in SeqIO.parse(dbFile, "fasta"):
+			if sequence == entry.seq:
+				#seqList.append(sequence)
+				desList.append(entry.description)
+				print entry.description
+				count = count + 1
+	if 	seqNumber == count:
+		clustersDic.update({cluster:desList})		
+	
 clusterDictionaryFile = open("/home/samaneh/eggNOG/clusterDictionary","w")
 for k in clustersDic.keys():
 	clusterDictionaryFile.write(k)
 	#print clustersDic[k]
-	clusterDictionaryFile.write(clustersDic[k])
+	for v in clustersDic[k]:
+		clusterDictionaryFile.write(v)
 	clusterDictionaryFile.write("###########")
-
-#print members.readlines()[0].strip().split("\t")[-1].split(",")
-
-
-
 
 
 
