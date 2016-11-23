@@ -32,6 +32,9 @@ for line in uniprotIdsFile.readlines():
 		else:	
 			uniprotDict.update({c:uniprotId})
 
+uniprotDicFile = open("/home/samaneh/essNOG/uniprotIdsDictionary.json","w")
+uniprotDicFile.write(uniprotDict)
+print "done"
 ##################################
 
 ##@sam## exract the records related to each uniprot id from sprot: 
@@ -44,7 +47,7 @@ uniprotIdsList = []
 sprotOutFile = open("/home/samaneh/eggNOG/sprotIncludedInEggnog.fasta","w")
 descList = []
 
-for k in uniprotDict.keys():	##@sam## in each cluster name searcg all uniprot ids in sprot database, if it is found 
+for k in uniprotDict.keys():	##@sam## in each cluster name search all uniprot ids in sprot database, if it is found 
 	newValueList = []
 	for record in SeqIO.parse(sprotDbFile,"fasta"):
 		sprotId = record.id.split("|")[1]
@@ -56,7 +59,7 @@ for k in uniprotDict.keys():	##@sam## in each cluster name searcg all uniprot id
 				descList.append(des)
 	uniprotDict.update({k:newValueList}) 	##@sam## updates the dictionary in a way that includes only uniprot id that are included in sprot
 with open("/home/samaneh/eggNOG/clusteredDescriptions.txt","w") as f:
-	for item in DescList:
+	for item in descList:
 		f.write(item)
 	f.write("\n############\n")		
 
