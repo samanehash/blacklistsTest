@@ -33,7 +33,6 @@ for i in range(0,4):
 	dataDfList[i].index = rownames
 	dataDfList[i] = dataDfList[i]["Evaluation-Score"] #filter columns except evaluation scores
 	dataDfList[i].columns = colnames
-	dataDfList[i].columns = colnames
 	dataDfList[i] = dataDfList[i].astype(float)
 
 

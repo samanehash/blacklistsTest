@@ -38,7 +38,7 @@ for i in range(0,3):
 
 ################mean calculation#######################
 
-for i in range(0,4):
+for i in range(0,3):
 	meanList = []
 	for j in range(0,4):
 		meanList.append(dataDfList[i][colnames[j]].mean())
