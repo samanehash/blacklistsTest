@@ -1,7 +1,9 @@
 '''
 @auther: Samaneh
 
-WORKING VERSION
+It's the previous approach! the current approach is to extracting the uniprot ids included in eggNOG using the provided file by eggNOG itself
+
+WORKING VERSION:
 
 from eggnog clusters data the cluster names, eggnog specified sequences' IDs (NOG.members.tsv), 
 all aligned sequences of each cluster (NOG_raw_algs), and the representative description (selected
