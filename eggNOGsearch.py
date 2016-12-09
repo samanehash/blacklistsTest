@@ -1,20 +1,11 @@
 '''
 @auther: Samaneh
 
-It's the previous approach! the current approach is to extracting the uniprot ids included in eggNOG using the provided file by eggNOG itself
-
-WORKING VERSION:
-
-from eggnog clusters data the cluster names, eggnog specified sequences' IDs (NOG.members.tsv), 
-all aligned sequences of each cluster (NOG_raw_algs), and the representative description (selected
-by eggnog algorithm) for each cluster (NOG.annotations.tsv) are available.
-
-Here I am 1. diminishing the clusters to only those cluster with sequences present in sprot
-database be included -> next script: 2. select the representative description for remaining clusters using my 
-algorithm 
+The whole planned algorithm is implemented here:
 
 
 '''
+
 from Bio import SeqIO
 import pandas as pd
 import numpy as np
@@ -22,54 +13,73 @@ import xlsxwriter
 import re
 import csv
 import os
+import json
 
-######################################################
+#########################################################################
 
-members = open("/home/samaneh/eggNOG/data/NOG.members.tsv","r")
-clusterNameList = []
-for member in members:
-	member = member.strip().split("\t")
-	clusterNameList.append(member[0] + "." + member[1])  ##@sam## a list of cluster names should be extracted from member file
-	#memberNames = member[-1].split(",")
-	#clustersDic.update({clusterName:memberNames})
+##@sam## 	Extracts all the uniprot IDs and corresponding clusters from eggNOG tsv file into a dictionary
+def uniprotIdsExtraction(uniprotIdsFile): 
 
-dbFile = open("/home/samaneh/AHRD/data/uniprot_sprot.fasta")
-
-clustersDic = dict()
-namesList = []
-seqdescs = []
-seqList = []
-desList = []
-
-for cluster in clusterNameList:			##@sam## phase2,3
-	fileToOpen = "/home/samaneh/eggNOG/data/NOG_raw_algs/" + cluster   ##@sam## according to the clusterName generate the name of cluster's
-	suffixList = [".meta_raw.fa", ".meta_raw.fasta", ".clustalo_raw.fa", ".mafft_raw.fa"]	##@sam## gives us 190637 out of 190649 so far
-	for s in suffixList:
-		fileToOpenName = fileToOpen + s 									##@sam## fasta file to be retrieved from raw_alg address
-		if os.path.isfile(fileToOpenName):	##@sam## checks if such file exists
-			clusterFile = open((fileToOpenName),"r")
-			namesList.append(cluster)
-	seqNumber = 0
-	count = 0		
-	for record in SeqIO.parse(clusterFile, "fasta"):
-		seqNumber = seqNumber + 1
-		sequence = str(record.seq).replace("-","")
-		for entry in SeqIO.parse(dbFile, "fasta"):
-			if sequence == entry.seq:
-				#seqList.append(sequence)
-				desList.append(entry.description)
-				print entry.description
-				count = count + 1
-	if 	seqNumber == count:
-		clustersDic.update({cluster:desList})		
+	uniprotIdDic = dict()
+	for line in uniprotIdsFile.readlines()[1:]:
+		uniprotId = line.split()[0]
+		uniprotClusters = line.split()[1].split(",")
+		uniprotIdDic.update({uniprotId:uniprotClusters})
 	
-clusterDictionaryFile = open("/home/samaneh/eggNOG/clusterDictionary","w")
-for k in clustersDic.keys():
-	clusterDictionaryFile.write(k)
-	#print clustersDic[k]
-	for v in clustersDic[k]:
-		clusterDictionaryFile.write(v)
-	clusterDictionaryFile.write("###########")
+	return uniprotIdDic
+		
+
+##@sam##	checkes the existance of uniprots in swissprot and for those that are included in sprot generates
+#			two dictionaries with clusternames as keys and one with sprot(uniprot) ids as values and the other
+#			one with sprot descriptions as values  					
+def DescriptionExtraction(uniprotIdDic, sprotFile):
+
+	idsDic = dict()
+	descsDic = dict()
+
+	for record in SeqIO.parse(sprotFile, "fasta"):
+		sprotId = record.id.split("|")[1]
+		for u in uniprotIdDic.keys():
+			if sprotId == u:
+				desc = record.description.strip(record.name).lstrip(" ")
+				desc = re.sub("OS=.*","",desc)
+				for clusterName in uniprotIdDic[u]:
+					if clusterName in idsDic.keys():
+						##@sam## insert to ids dictionary
+						idTempList = idsDic[clusterName]
+						idTempList.append(u)
+						idsDic.update({clusterName:idTempList})
+						##@sam## insert to descriptions dictionary
+						descTempList = descsDic[clusterName]
+						descTempList.append(desc)
+						descsDic.update({clusterName:descTempList})
+
+					else:
+						##@sam## insert to ids dictionary
+						uniprotList = []
+						uniprotList.append(u)
+						idsDic.update({clusterName:uniprotList})	
+						##@sam## insert to descriptions dictionary
+						descList = []
+						descList.append(desc)
+						descsDic.update({clusterName:descList})
 
 
+	print idsDic, descsDic			
+	writer(idsDic, descsDic)
+
+
+
+def handler():
+
+	uniprotIdsFile = open("/home/samaneh/eggNOG/data/uniprot-LUCA.tsv", "r")
+	uniprotIdDic = uniprotIdsExtraction(uniprotIdsFile)
+	sprotFile = open("/home/samaneh/AHRD/data/uniprot_sprot.fasta", "r")
+	DescriptionExtraction(uniprotIdDic, sprotFile)
+	
+
+
+
+if __name__ == "__main__":
+	handler()
 
