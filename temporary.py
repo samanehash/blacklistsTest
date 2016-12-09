@@ -17,62 +17,77 @@ import json
 
 #########################################################################
 
-uniprotIdsFile = open("/home/samaneh/eggNOG/data/other/uniprot-all.tsv", "r")
-uniprotDict = dict()
-tempList = []
-newList = []
-##@sam## extract a dictionary from cluster names as keys and uniprot ids as values
+def extraction(uniprotIdsFile, sprotFile):
 
 
-for line in uniprotIdsFile.readlines():
-	clusterName = line.split()[0]
-	#clusterNamesList.append(line.split()[0])
-	uniprotId = line.split()[1].split(",") 
-	if "-" in uniprotId:
-		uniprotId.remove("-")
-	if clusterName in uniprotDict.keys():
-		tempList = uniprotDict[clusterName]
-		newList = tempList + uniprotId
-		uniprotDict.update({clusterName:newList})
-	else:	
-		uniprotDict.update({clusterName:uniprotId})
-print uniprotDict
-with open("/home/samaneh/eggNOG/uniprotIdsDictionary.json","w") as uniprotDicFile:
-	json.dump(uniprotDict, uniprotDicFile)
+	idsDic = dict()
+	descsDic = dict()
+	clusterNamesList = []
 
-uniprotDicFile.close()
-print "done"
-##################################
-
-##@sam## exract the records related to each uniprot id from sprot: 
-
-sprotDbFile = open("/home/samaneh/AHRD/data/uniprot_sprot.fasta","r")
-
-sprotIdsList = []
-uniprotIdsList = []
-
-sprotOutFile = open("/home/samaneh/eggNOG/sprotIncludedInEggnog.fasta","w")
-descList = []
-
-with open("/home/samaneh/eggNOG/clusteredDescriptions.txt","w") as f:
-	for cluster in uniprotDict.keys():	##@sam## in each cluster name search all uniprot ids in sprot database, if it is found 
-		newValueList = []
-		for record in SeqIO.parse(sprotDbFile,"fasta"):
+	for line in uniprotIdsFile.readlines()[1:]:
+		uniprotId = line.split()[0]
+		for record in SeqIO.parse(sprotFile, "fasta"):
 			sprotId = record.id.split("|")[1]
-			for uid in uniprotDict[cluster]:
-				if uid == sprotId:
-					sprotIdList.append(record.id)
-					des = record.description.strip(record.name).strip(" ")
-					des = re.sub("OS=.*","",des)	
-					descList.append(des)
+			if sprotId == uniprotId :
+				print uniprotId
+				desc = record.description.strip(record.name).lstrip(" ")
+				desc = re.sub("OS=.*","",desc)
+
+				clusterNamesList = line.split()[1].split(",")
+				for name in clusterNamesList:
+					if name in idsDic.keys():
+						##@sam## insert to ids dictionary
+						idTempList = idsDic[name]
+						idTempList.append(uniprotId)
+						idsDic.update({name:idTempList})
+						##@sam## insert to descriptions dictionary
+						descTempList = descsDic[name]
+						descTempList.append(desc)
+						descsDic.update({name:descTempList})
+
+					else:
+						##@sam## insert to ids dictionary
+						uniprotList = []
+						uniprotList.append(uniprotId)
+						idsDic.update({name:uniprotList})	
+						##@sam## insert to descriptions dictionary
+						descList = []
+						descList.append(desc)
+						descsDic.update({name:descList})
+
+	print idsDic, descsDic					
+	writer(idsDic, descsDic)
+
+
+def writer(clusterAndIdsDic, clusterAndDescsDic):
+
+	clusteredFile = open("/home/samaneh/eggNOG/eggNOG_clusters_descriptions.txt","w")
+	for cName in clusterAndIdsDic.keys():
+		##@sam## the length of two lists below would be the same
+		idsList = clusterAndIdsDic[cName]
+		descsList = clusterAndDescsDic[cName]
+
+		clusterName = cName + " :\n"
+		clusteredFile.write(clusterName)
 		
-		f.write("\n")
-		f.write(cluster)
-		for i in range(0,len(sprotIdsList)):
-			f.write(sprotIdsList[i])
-			f.write(" | ")
-			f.write(descList[i])
-		f.write("\n###############\n")
+		for i in range(0,len(idsList)):
+			line = idsList[i] + " | " + descList[i] + "\n"
+			clusteredFile.write(line)
+
+		clusteredFile("###################\n")	
+
+
+
+def handler():
+
+	uniprotIdsFile = open("/home/samaneh/eggNOG/data/uniprot-LUCA.tsv", "r")
+	sprotFile = open("/home/samaneh/AHRD/data/uniprot_sprot.fasta", "r")
+	extraction(uniprotIdsFile, sprotFile)
+
+
+
+if __name__ == "__main__":
+	handler()
 
 
 
