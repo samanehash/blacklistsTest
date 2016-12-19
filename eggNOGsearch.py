@@ -68,13 +68,29 @@ def DescriptionExtraction(uniprotIdDic, sprotFile):
 	print idsDic, descsDic			
 	writer(idsDic, descsDic)
 
+def writer(clusterAndIdsDic, clusterAndDescsDic):
+
+	clusteredFile = open("/home/samaneh/eggNOG/eggNOG_clusters_descriptions.txt","w")
+	for cName in clusterAndIdsDic.keys():
+		##@sam## the length of two lists below would be the same
+		idsList = clusterAndIdsDic[cName]
+		descsList = clusterAndDescsDic[cName]
+
+		clusterName = cName + " :\n"
+		clusteredFile.write(clusterName)
+		
+		for i in range(0,len(idsList)):
+			line = idsList[i] + " | " + descList[i] + "\n"
+			clusteredFile.write(line)
+
+		clusteredFile("###################\n")	
 
 
 def handler():
 
 	uniprotIdsFile = open("/home/samaneh/eggNOG/data/uniprot-LUCA.tsv", "r")
 	uniprotIdDic = uniprotIdsExtraction(uniprotIdsFile)
-	sprotFile = open("/home/samaneh/AHRD/data/uniprot_sprot.fasta", "r")
+	sprotFile = open("/home/samaneh/AHRD/data/db/uniprot_sprot.fasta", "r")
 	DescriptionExtraction(uniprotIdDic, sprotFile)
 	
 
