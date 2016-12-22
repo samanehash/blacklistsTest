@@ -263,15 +263,21 @@ class clusters():
 				
 				self.longest_common_string = self.longest_common_string.replace("putative","").replace("(fragment)","").replace("(fragments)","").replace(" truncated","").replace("truncated","").replace("homolog","").replace("probable","").replace("(predicted)","")
 			
-				resFile.write(clusterName + "\n" + self.longest_common_string + "\n" + "*******" + "\n")
-
 
 				for n in names:
 					resultDic.update({n:self.longest_common_string})
+
+				toPrint = clusterName + "\n"
+				for n in resultDic.keys():
+					toPrint = toPrint + n + " | " + resultDic[n] + "\n"
+				toPrint = toPrint + "***********" + "\n"	 	
+				resFile.write(toPrint)
+
+
 				##@sam## write the dictionary into a json file:
 				#outFile = open("/home/samaneh/AHRD/clustering/seqIDsAndDescriptions","w")
 				#json.dump(resultDic, outFile)	
-			return resultDic
+
 
 ########################################
 	# @staticmethod ##@sam## create static method:
@@ -300,7 +306,7 @@ class clusters():
 					self.seqsNumber = len(names)	
 
 			else:
-				if ":" in lines[i]:
+				if " :" in lines[i]:
 					clusterName = lines[i].rstrip("\n")
 				else:	
 					tempFlag = True
@@ -320,8 +326,8 @@ class clusters():
 def handler():
 
 	d = clusters()
-	clustersFile = open("/home/samaneh/eggNOG/eggNOG_clustering_descriptions.txt","r")
-	resultFile = open("/home/samaneh/eggNOG/ClusterDescriptions_onEggNOG.txt","w")
+	clustersFile = open("/home/samaneh/eggNOG/output/eggNOG_clustering_descriptions_filtered.txt","r")
+	resultFile = open("/home/samaneh/eggNOG/output/ClusterDescriptions_onEggNOG.txt","w")
 	d.extractDesc(clustersFile,resultFile)
 
 if __name__ == "__main__":
