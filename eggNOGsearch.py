@@ -70,7 +70,7 @@ def DescriptionExtraction(uniprotIdDic, sprotFile):
 
 def writer(clusterAndIdsDic, clusterAndDescsDic):
 
-	clusteredFile = open("/home/samaneh/eggNOG/eggNOG_clusters_descriptions.txt","w")
+	clusteredFile = open("/home/samaneh/eggNOG/eggNOG_clustering_descriptions.txt","w")
 	for cName in clusterAndIdsDic.keys():
 		##@sam## the length of two lists below would be the same
 		idsList = clusterAndIdsDic[cName]
