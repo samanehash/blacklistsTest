@@ -285,7 +285,7 @@ class clusters():
 				seqNames[1] = seqNames[1].replace("putative","").replace("(fragment)","").replace("(fragments)","").replace(" truncated","").replace("truncated","").replace("homolog","").replace("probable","").replace("(predicted)","")
 				seqNames[1] = seqNames[1].lstrip().rstrip()
 				names.append(seqNames[0])
-				descs.append(seqNames[1])
+				descs.append(seqNames[1])	
 
 		####from here you can start generateing new fata file using resultdictionary:
 
