@@ -1,8 +1,6 @@
 '''
 @auther: Samaneh
 
-The whole planned algorithm is implemented here:
-
 
 '''
 
@@ -14,63 +12,79 @@ import re
 import csv
 import os
 import json
+############################################################################################
 
-#########################################################################
+##@sam## Find the intersection between eggNOG and swissprot: return a list of corresponding ids
 
-##@sam## 	Extracts all the uniprot IDs and corresponding clusters from eggNOG tsv file into a dictionary
-def uniprotIdsExtraction(uniprotIdsFile): 
+def bothIdsExtraction(sprotFile,uniprotIdsFile):
+	uniprotList = []
+	sprotList = []
+	idsDict = dict()
+	descsDict = dict()
 
-	uniprotIdDic = dict()
-	for line in uniprotIdsFile.readlines()[1:]:
-		uniprotId = line.split()[0]
-		uniprotClusters = line.split()[1].split(",")
-		uniprotIdDic.update({uniprotId:uniprotClusters})
-	
-	return uniprotIdDic
+	for record in SeqIO.parse(sprotFile, "fasta"):
+		sprotId = record.id.split("|")[1]
+		sprotList.append(sprotId)
+
+		sprotDisc = record.description.strip(record.name).lstrip(" ")
+		sprotDisc = re.sub("OS=.*","",sprotDisc)
+		descsDict.update({sprotId:sprotDisc})
 		
 
-##@sam##	checkes the existance of uniprots in swissprot and for those that are included in sprot generates
-#			two dictionaries with clusternames as keys and one with sprot(uniprot) ids as values and the other
-#			one with sprot descriptions as values  					
-def DescriptionExtraction(uniprotIdDic, sprotFile):
+	for line in uniprotIdsFile:
+		uniprotId = line.split()[0].strip(" ")
+		uniprotList.append(uniprotId)
+		uniprotClusters = line.split()[1].split(",")
+		idsDict.update({uniprotId:uniprotClusters})
+
+	bothIdsList = set(sprotList).intersection(set(uniprotList))	
+
+	for d in idsDict.keys():
+		if d not in bothIdsList:
+			del idsDict[d]
+	for de in descsDict.keys():
+		if de not in bothIdsList:
+			del descsDict[de] 		
+
+	return idsDict, descsDict
+
+####################################
+
+def DescriptionExtraction(idsDict, descsDict):
 
 	idsDic = dict()
 	descsDic = dict()
 
-	for record in SeqIO.parse(sprotFile, "fasta"):
-		sprotId = record.id.split("|")[1]
-		for u in uniprotIdDic.keys():
-			if sprotId == u:
-				desc = record.description.strip(record.name).lstrip(" ")
-				desc = re.sub("OS=.*","",desc)
-				for clusterName in uniprotIdDic[u]:
-					if clusterName in idsDic.keys():
-						##@sam## insert to ids dictionary
-						idTempList = idsDic[clusterName]
-						idTempList.append(u)
-						idsDic.update({clusterName:idTempList})
-						##@sam## insert to descriptions dictionary
-						descTempList = descsDic[clusterName]
-						descTempList.append(desc)
-						descsDic.update({clusterName:descTempList})
+	for i in idsDict.keys():
+		clusters = idsDict[i]
+		for cluster in clusters:
+			if cluster in idsDic.keys():
+				##@sam## insert to ids dictionary
+				idTempList = idsDic[cluster]
+				idTempList.append(i)
+				idsDic.update({cluster:idTempList})
 
-					else:
-						##@sam## insert to ids dictionary
-						uniprotList = []
-						uniprotList.append(u)
-						idsDic.update({clusterName:uniprotList})	
-						##@sam## insert to descriptions dictionary
-						descList = []
-						descList.append(desc)
-						descsDic.update({clusterName:descList})
+				##@sam## insert to descriptions dictionary
+				descTempList = descsDic[cluster]
+				descTempList.append(descsDict[i])
+				descsDic.update({cluster:descTempList})
+			else:
+				##@sam## insert to ids dictionary
+				idList = []
+				idList.append(i)
+				idsDic.update({cluster:idList})
 
+				##@sam## insert to descriptions dictionary
+				descList = []
+				descList.append(descsDict[i])
+				descsDic.update({cluster:descList})
 
-	print idsDic, descsDic			
+		
 	writer(idsDic, descsDic)
 
 def writer(clusterAndIdsDic, clusterAndDescsDic):
 
-	clusteredFile = open("/home/samaneh/eggNOG/eggNOG_clustering_descriptions.txt","w")
+	clusteredFile = open("/home/samaneh/eggNOG/output/eggNOG_clustering_descriptions_all.txt","w")
 	for cName in clusterAndIdsDic.keys():
 		##@sam## the length of two lists below would be the same
 		idsList = clusterAndIdsDic[cName]
@@ -80,22 +94,21 @@ def writer(clusterAndIdsDic, clusterAndDescsDic):
 		clusteredFile.write(clusterName)
 		
 		for i in range(0,len(idsList)):
-			line = idsList[i] + " | " + descList[i] + "\n"
+			line = idsList[i] + " | " + descsList[i] + "\n"
 			clusteredFile.write(line)
 
-		clusteredFile("###################\n")	
+		clusteredFile.write("\n###################\n")	
 
+	clusteredFile.close()	
 
 def handler():
 
 	uniprotIdsFile = open("/home/samaneh/eggNOG/data/uniprot-LUCA.tsv", "r")
-	uniprotIdDic = uniprotIdsExtraction(uniprotIdsFile)
 	sprotFile = open("/home/samaneh/AHRD/data/db/uniprot_sprot.fasta", "r")
-	DescriptionExtraction(uniprotIdDic, sprotFile)
+
+	idsDict, descsDict = bothIdsExtraction(sprotFile, uniprotIdsFile)
+	uniprotIdDic = DescriptionExtraction(idsDict, descsDict)
 	
 
-
-
 if __name__ == "__main__":
-	handler()
-
+	handler()	
